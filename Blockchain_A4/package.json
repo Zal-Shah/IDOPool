@@ -1,0 +1,21 @@
+{
+  "name": "blockchain_a4",
+  "version": "1.0.0",
+  "description": "This repository implements a decentralized IDO (Initial DEX Offering) pool entirely on-chain, using user-defined ERC‑20 tokens for both sale and payment. It provides:",
+  "main": "IDOPool.test.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "chai": "^4.5.0",
+    "hardhat": "^2.24.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.3.0"
+  }
+}

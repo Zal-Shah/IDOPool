@@ -1,28 +1,33 @@
-# IDOPool Project
+# IDOPool Assignment
 
-This repository implements a decentralized IDO (Initial DEX Offering) pool entirely on-chain, using user-defined ERC‑20 tokens for both sale and payment. It provides:
+**Authors:**
+- Zalan Wiqar Shah (21i-0672)
+- Umair Khan (21i-2556)
+- Zayn Saleem (21i-0389)
 
-- **IDOPool.sol** — single-contract sale logic with soft cap, refund windows, admin-controlled refunds, and unsold-token withdrawal.
-- **MyToken.sol**, **PaymentToken.sol** — simple OpenZeppelin ERC‑20 mocks for sale and payment tokens.
-- **scripts/deploy.js** — a Hardhat deployment script for local and public test networks.
-- **test/IDOPool.test.js** — a Hardhat test suite covering all major flows (purchase, refund, finalize, withdraw).
-- **README.md** — this document, explaining how to deploy and test the contract.
-- **(Optional)** **src/** — a minimal React front-end for interacting with the deployed pool.
+This repository implements a decentralized IDO (Initial DEX Offering) pool entirely on-chain, using user-defined ERC‑20 tokens for both sale and payment. It includes:
+
+- **contracts/IDOPool.sol** — single-contract sale logic with soft cap, refund windows, admin-controlled refunds, and unsold-token withdrawal.
+- **contracts/MyToken.sol** — simple OpenZeppelin ERC‑20 mock for the sale token.
+- **contracts/PaymentToken.sol** — simple OpenZeppelin ERC‑20 mock for the payment token.
+- **scripts/deploy.js** — Hardhat deployment script for local and public networks.
+- **test/IDOPool.test.js** — Hardhat test suite covering purchase, refunds, finalization, and unsold-token withdrawal.
+-- **README.md** — this document, explaining how to install, deploy, and test the contracts.
 
 ---
 
 ## Prerequisites
 
-- **Node.js** (v14 or later)
-- **npm** or **yarn**
-- **Hardhat** (installed via npm)
-- **MetaMask** (for manual Remix testing or front-end)
+- Node.js (v14 or later)
+- npm or yarn
+- Hardhat (installed via npm)
+- MetaMask (for manual testing in Remix or front-end)
 
 ---
 
 ## Installation
 
-Clone and install dependencies:
+Clone the repository and install dependencies:
 
 ```bash
 git clone <your-repo-url>
@@ -34,13 +39,13 @@ npm install
 
 ## Compilation
 
-Compile all Solidity contracts with Hardhat:
+Compile all contracts with Hardhat:
 
 ```bash
-npx hardhat compile
+npm run compile
 ```
 
-You can also verify the contracts in Remix by opening `contracts/` and compiling with Solidity v0.8.x.
+Or, in Remix, open the `contracts/` folder and compile each `.sol` file with Solidity v0.8.x.
 
 ---
 
@@ -54,69 +59,64 @@ Start a local node:
 npx hardhat node
 ```
 
-In a separate terminal, deploy contracts:
+In a second terminal, deploy contracts:
 
 ```bash
-npx hardhat run scripts/deploy.js --network localhost
+npm run deploy:localhost
 ```
 
-The script will:
+This runs `scripts/deploy.js` and will:
 
-1. Deploy **PaymentToken** (mock stablecoin).
-2. Deploy **MyToken** (sale token).
-3. Deploy **IDOPool** with constructor arguments:
-   - `saleToken.address`
-   - `paymentToken.address`
+1. Deploy **PaymentToken** (mints 1 000 PTKN to deployer).
+2. Deploy **MyToken** (mints 1 000 000 STKN to deployer).
+3. Deploy **IDOPool** with parameters:
+   - `saleToken`: MyToken address
+   - `paymentToken`: PaymentToken address
    - `rate = 100`
-   - `cap = 500` PTKN (in base units)
-   - `softCap = 200` PTKN (in base units)
-   - `start = 0` (timestamp)
-   - `end = 600` (timestamp)
-4. Fund the pool with 500 000 STKN.
+   - `cap = 500 PTKN` (in base units)
+   - `softCap = 200 PTKN` (in base units)
+   - `startOffset = 0` (sale starts immediately)
+   - `endOffset = 600` (sale lasts 600 s)
+4. Funds the pool with 500 000 STKN.
 
-Copy the deployed addresses printed in the console for manual testing or front-end integration.
+Copy the printed addresses for manual testing or front-end.
 
 ### 2. Public Testnet (e.g., Goerli)
 
-Configure your `hardhat.config.js` with an RPC URL and deployer private key. Then:
+Configure your API key and deployer key in `hardhat.config.js`, then:
 
 ```bash
-npx hardhat run scripts/deploy.js --network goerli
+npm run deploy:goerli
 ```
 
 ---
 
 ## Testing
 
-Run the Hardhat test suite:
+Run the full Hardhat test suite:
 
 ```bash
-npx hardhat test
+npm test
 ```
 
-The tests cover:
+Tests cover:
 
-- Token funding and sale initialization.
-- Buyer purchase flow (`purchase`).
-- Refund logic (pre- and post-sale, soft-cap conditions, admin overrides).
-- Sale finalization for both success (soft cap met) and failure cases.
+- Buyer purchase and token issuance.
+- User refunds via admin flag and refund window.
+- Sale finalization for both success and failure scenarios.
 - Unsold-token withdrawal by the owner.
-- Admin functions: changing caps, refund windows, immediate start/end.
+- Admin controls (`setCap`, `setSoftCap`, `startSale`, `endSale`, `setRefundWindow`, `enableGlobalRefund`).
 
 ---
 
 ## Manual Testing with Remix
 
-1. Visit [Remix IDE](https://remix.ethereum.org).
-2. Create a workspace and upload:
-   - `contracts/PaymentToken.sol`
-   - `contracts/MyToken.sol`
-   - `contracts/IDOPool.sol`
-3. Compile each contract under **Solidity Compiler** (version 0.8.x).
-4. In **Deploy & Run**:
-   - **Environment** → **JavaScript VM (Prague)**
-   - Deploy **PaymentToken** with initial supply (e.g., `1000 * 10**18`).
-   - Deploy **MyToken** with initial supply (e.g., `1_000_000 * 10**18`).
+1. Open [Remix IDE](https://remix.ethereum.org).
+2. Upload the contracts from `contracts/`.
+3. Compile with Solidity v0.8.x.
+4. In **Deploy & Run** using **JavaScript VM**:
+   - Deploy **PaymentToken** with supply `1000 * 10**18`.
+   - Deploy **MyToken** with supply `1_000_000 * 10**18`.
    - Deploy **IDOPool** with:
      ```text
      saleToken = MyToken.address
@@ -124,31 +124,14 @@ The tests cover:
      rate = 100
      cap = 500 * 10**18
      softCap = 200 * 10**18
-     start = 0
-     end = 600
-     ``` 
-   - Fund the pool: **MyToken.transfer(poolAddress, 500_000*10**18)**.
-5. Switch **Account** to **Account 1** for buyer actions:
-   - **PaymentToken.transfer(buyer, 300*10**18)** (from Account 0)
-   - **PaymentToken.approve(poolAddress, 100*10**18)** (as buyer)
-   - **IDOPool.purchase(100*10**18)**
-   - Test **refund()**, **enableGlobalRefund()**, **setRefundWindow()**, **finalize()**, **withdrawUnsoldTokens()** by switching accounts and advancing time in the VM.
+     startOffset = 0
+     endOffset = 600
+     ```
+   - Fund the pool: `MyToken.transfer(poolAddress, 500_000 * 10**18)`.
+5. Switch accounts to simulate buyer and owner flows:
+   - Transfer PTKN to buyer, approve, and call `purchase()`.
+   - Test `refund()`, `enableGlobalRefund()`, `setRefundWindow()`, `finalize()`, and `withdrawUnsoldTokens()` by switching accounts and advancing time.
 
----
-
-## (Optional) Front-End Interface
-
-A simple React app in `src/` demonstrates connecting with MetaMask, calling `purchase`, `refund`, and `finalize`. To run:
-
-```bash
-cd src
-npm install
-npm start
-```
-
-Configure the contract address in `App.jsx` and ensure MetaMask is pointed at the same network.
-
----
 
 ## License
 

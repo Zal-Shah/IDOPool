@@ -1,0 +1,59 @@
+console.log("Owner STKN balance:", (await MyToken.balanceOf(owner.address)).toString());
+await IDOPool.withdrawUnsoldTokens();
+// If softCap was met, withdraw unsold STKN
+await IDOPool.finalize();
+// Finalize
+await ethers.provider.send("evm_mine");
+await ethers.provider.send("evm_increaseTime", [601]);
+// Jump past sale end
+await IDOPool.connect(buyer).refund();
+await IDOPool.connect(buyer).purchase(ethers.parseUnits("50",18));
+await PaymentToken.connect(buyer).approve(IDOPool.address, ethers.parseUnits("50",18));
+// Buyer buys again, then refunds within window:
+await IDOPool.setRefundWindow(now - 10, now + 10);
+const now = (await ethers.provider.getBlock()).timestamp;
+// Set a window covering “now”
+console.log("Buyer PTKN after refund:", (await PaymentToken.balanceOf(buyer.address)).toString());
+await IDOPool.connect(buyer).refund();
+// Buyer claims refund
+await IDOPool.enableGlobalRefund();
+console.log("Buyer STKN balance:", (await MyToken.balanceOf(buyer.address)).toString());// Owner enables refunds
+console.log("Contributed:", (await IDOPool.contributions(buyer.address)).toString());
+// 4. Verify contributions & balances
+await IDOPool.connect(buyer).purchase(ethers.parseUnits("100",18));
+// 3. Buyer calls purchase(100 PTKN)
+await PaymentToken.connect(buyer).approve(IDOPool.address, ethers.parseUnits("100",18));
+// 2. Buyer approves the pool to spend 100 PTKN
+await PaymentToken.transfer(buyer.address, ethers.parseUnits("300",18));
+console.log("Pool saleToken balance:", (await MyToken.balanceOf(IDOPool.address)).toString());// 1. Seed buyer with 300 PTKN
+// 2. Confirm pool’s sale‐token balance (should be 500 000 STKN):
+console.log("softCap:", (await IDOPool.softCap()).toString());
+console.log("Cap:",  (await IDOPool.cap()).toString());
+console.log("Rate:", (await IDOPool.rate()).toString());
+// 1. Check pool parameters:
+const IDOPool      = await ethers.getContractAt("IDOPool",      "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
+const MyToken      = await ethers.getContractAt("MyToken",      "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512");
+const PaymentToken = await ethers.getContractAt("PaymentToken", "0x5FbDB2315678afecb367f032d93F642f64180aa3");
+// Attach to deployed contracts:
+const [owner, buyer] = await ethers.getSigners();
+// 2. Confirm pool’s sale‐token balance (should be 500 000 STKN):
+console.log("softCap:", (await IDOPool.softCap()).toString());
+console.log("Cap:",  (await IDOPool.cap()).toString());
+console.log("Rate:", (await IDOPool.rate()).toString());
+// 1. Check pool parameters:
+const IDOPool      = await ethers.getContractAt("IDOPool",      "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
+const MyToken      = await ethers.getContractAt("MyToken",      "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512");
+const PaymentToken = await ethers.getContractAt("PaymentToken", "0x5FbDB2315678afecb367f032d93F642f64180aa3");
+// Attach to deployed contracts:
+const [owner, buyer] = await ethers.getSigners();
+console.log("Pool saleToken balance:", (await MyToken.balanceOf(IDOPool.address)).toString());
+// 2. Confirm pool’s sale‐token balance (should be 500 000 STKN):
+console.log("softCap:", (await IDOPool.softCap()).toString());
+console.log("Cap:",  (await IDOPool.cap()).toString());
+console.log("Rate:", (await IDOPool.rate()).toString());
+// 1. Check pool parameters:
+const IDOPool      = await ethers.getContractAt("IDOPool",      "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0");
+const MyToken      = await ethers.getContractAt("MyToken",      "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512");
+const PaymentToken = await ethers.getContractAt("PaymentToken", "0x5FbDB2315678afecb367f032d93F642f64180aa3");
+// Attach to deployed contracts:
+const [owner, buyer] = await ethers.getSigners();
